@@ -1,39 +1,48 @@
-import { FC } from "react";
+import { FC, useState } from 'react';
 
-import { useWorldTime } from "./useWorldTime";
-import { useTime } from "./useTime";
+import { useWorldTime } from './useWorldTime';
 
-import { DEGREES_IN_CIRCLE } from "./constants";
-
-import styles from "./Clock.module.css";
+import styles from './Clock.module.css';
 
 const Clock: FC = () => {
-  const date = useWorldTime();
-  const { seconds, minutes, hours, time } = useTime(date);
+  const apiDate = useWorldTime();
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+
+  const clock = () => {
+    let date = new Date();
+
+    let hh = date.getHours() * 30,
+      mm = date.getMinutes() * 6,
+      ss = date.getSeconds() * 6;
+
+    setHours(hh + mm / 12);
+    setMinutes(mm);
+    setSeconds(ss);
+  };
+  setInterval(clock, 1000);
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.time}>{time}</div>
-      <div className={styles.clock}>
-        <div className={styles.hour_3} />
-        <div className={styles.hour_6} />
-        <div className={styles.hour_9} />
-        <div className={styles.hour_12} />
-        <div className={styles.clockCenter} />
-        <div
-          className={styles.hourHand}
-          style={{ transform: `rotate(${hours * DEGREES_IN_CIRCLE}deg)` }}
-        />
-        <div
-          className={styles.minuteHand}
-          style={{ transform: `rotate(${minutes * DEGREES_IN_CIRCLE}deg)` }}
-        />
-        <div
-          className={styles.secondHand}
-          style={{ transform: `rotate(${seconds * DEGREES_IN_CIRCLE}deg)` }}
-        />
-      </div>
-      <div className={styles.semicircle} />
+    <div className={styles.clock__circle}>
+      <span className={styles.clock__twelve}></span>
+      <span className={styles.clock__three}></span>
+      <span className={styles.clock__six}></span>
+      <span className={styles.clock__nine}></span>
+
+      <div className={styles.clock__rounder}></div>
+      <div
+        className={styles.clock__hour}
+        style={{ transform: `rotateZ(${hours + minutes / 12}deg)` }}
+      ></div>
+      <div
+        className={styles.clock__minutes}
+        style={{ transform: `rotateZ(${minutes}deg)` }}
+      ></div>
+      <div
+        className={styles.clock__seconds}
+        style={{ transform: `rotateZ(${seconds}deg)` }}
+      ></div>
     </div>
   );
 };
