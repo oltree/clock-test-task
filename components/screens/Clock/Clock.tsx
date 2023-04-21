@@ -4,6 +4,7 @@ import {
   HOURS_ON_CLOCK,
   HOUR_IN_DEGREES,
   MINUTE_IN_DEGREES,
+  ONE_SECOND,
 } from './constants';
 
 import styles from './Clock.module.css';
@@ -22,7 +23,7 @@ const Clock: FC = () => {
     setIsMounted(true);
 
     const intervalId = setInterval(() => {
-      setDate((prevDate) => new Date(prevDate.getTime() + 1000));
+      setDate((prevDate) => new Date(prevDate.getTime() + ONE_SECOND));
     }, 1000);
 
     return () => clearInterval(intervalId);
