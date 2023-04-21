@@ -1,48 +1,75 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 
-import { useWorldTime } from './useWorldTime';
+import {
+  HOURS_ON_CLOCK,
+  HOUR_IN_DEGREES,
+  MINUTE_IN_DEGREES,
+} from './constants';
 
 import styles from './Clock.module.css';
 
+interface Degrees {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 const Clock: FC = () => {
-  const apiDate = useWorldTime();
-  const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(0);
-  const [seconds, setSeconds] = useState(0);
+  const [date, setDate] = useState<Date>(new Date());
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  const clock = () => {
-    let date = new Date();
+  useEffect(() => {
+    setIsMounted(true);
 
-    let hh = date.getHours() * 30,
-      mm = date.getMinutes() * 6,
-      ss = date.getSeconds() * 6;
+    const intervalId = setInterval(() => {
+      setDate((prevDate) => new Date(prevDate.getTime() + 1000));
+    }, 1000);
 
-    setHours(hh + mm / 12);
-    setMinutes(mm);
-    setSeconds(ss);
-  };
-  setInterval(clock, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const degrees: Degrees = useMemo(() => {
+    const hoursDeg = date.getHours() * HOUR_IN_DEGREES;
+    const minutesDeg = date.getMinutes() * MINUTE_IN_DEGREES;
+    const secondsDeg = date.getSeconds() * MINUTE_IN_DEGREES;
+
+    return {
+      hours: hoursDeg + minutesDeg / HOURS_ON_CLOCK,
+      minutes: minutesDeg,
+      seconds: secondsDeg,
+    };
+  }, [date]);
+
+  const time: string = useMemo(() => date.toLocaleTimeString(), [date]);
 
   return (
-    <div className={styles.clock__circle}>
-      <span className={styles.clock__twelve}></span>
-      <span className={styles.clock__three}></span>
-      <span className={styles.clock__six}></span>
-      <span className={styles.clock__nine}></span>
+    <div className={styles.wrapper}>
+      {isMounted && (
+        <>
+          <div className={styles.time}>{time}</div>
+          <div className={styles.clock}>
+            <span className={styles.clock__twelve} />
+            <span className={styles.clock__three} />
+            <span className={styles.clock__six} />
+            <span className={styles.clock__nine} />
 
-      <div className={styles.clock__rounder}></div>
-      <div
-        className={styles.clock__hour}
-        style={{ transform: `rotateZ(${hours + minutes / 12}deg)` }}
-      ></div>
-      <div
-        className={styles.clock__minutes}
-        style={{ transform: `rotateZ(${minutes}deg)` }}
-      ></div>
-      <div
-        className={styles.clock__seconds}
-        style={{ transform: `rotateZ(${seconds}deg)` }}
-      ></div>
+            <div className={styles.clock__rounder} />
+            <div
+              className={styles.clock__hour}
+              style={{ transform: `rotateZ(${degrees.hours}deg)` }}
+            />
+            <div
+              className={styles.clock__minutes}
+              style={{ transform: `rotateZ(${degrees.minutes}deg)` }}
+            />
+            <div
+              className={styles.clock__seconds}
+              style={{ transform: `rotateZ(${degrees.seconds}deg)` }}
+            />
+          </div>
+        </>
+      )}
+      <div className={styles.semicircle} />
     </div>
   );
 };
